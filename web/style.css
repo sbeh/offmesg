@@ -1,0 +1,25 @@
+body {
+  width: 760px;
+  margin: auto;
+}
+
+.global {
+  float: left;
+  text-align: left;
+
+  width: 49%;
+  margin-bottom: 10px;
+}
+
+.local {
+  float: right;
+  text-align: right;
+
+  width: 49%;
+  margin-bottom: 10px;
+}
+
+.new {
+  clear: both;
+  text-align: center;
+}
