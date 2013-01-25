@@ -14,19 +14,23 @@
 
     <div class='local'>
       Local messages<br>
-      Saved on client-side, visible to client only.
+      Saved on client-side, visible to client only.<br>
+      <br>
+
+      <div id='localMessages'></div>
     </div>
 
     <div class='new'>
-      <textarea></textarea><br>
+      <textarea id='message'></textarea><br>
 
-      <button>Save as local message</button>
-      <button>Empty local messages</button><br>
+      <button id='localSave' disabled>Save as local message</button>
+      <button id='localClear' disabled>Empty local messages</button><br>
 
       <button>Sync local to global messages</button>
       <button>Empty global messages</button>
     </div>
 
+    <script type='application/dart' src='script.dart'></script>
     <script src='packages/browser/dart.js'></script>
   </body>
 </html>
