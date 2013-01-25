@@ -4,6 +4,10 @@ import 'dart:async';
 import 'lib/local_storage_list.dart';
 
 void main() {
+  ButtonElement globalSave = query('#globalSave');
+  ButtonElement globalClear = query('#globalClear');
+  DivElement globalMessages = query('#globalMessages');
+
   ButtonElement localSave = query('#localSave');
   ButtonElement localClear = query('#localClear');
   DivElement localMessages = query('#localMessages');
@@ -13,6 +17,7 @@ void main() {
 
   localList.asList.forEach((m) => addMessageToDOM(localMessages, m));
   localClear.disabled = localList.asList.isEmpty;
+  globalSave.disabled = localList.asList.isEmpty;
 
   localSave.on.click.add((e) {
     if(!message.value.trim().isEmpty)
@@ -30,6 +35,7 @@ void main() {
     localSave.disabled = true;
 
     localClear.disabled = false;
+    globalSave.disabled = false;
   });
 
   localClear.on.click.add((e) {
@@ -39,6 +45,34 @@ void main() {
   localList.on('clear', () {
     localMessages.children.clear();
     localClear.disabled = true;
+    globalSave.disabled = true;
+  });
+
+  var globalList = new LocalStorageList('global');
+
+  globalList.asList.forEach((m) => addMessageToDOM(globalMessages, m));
+  globalClear.disabled = globalList.asList.isEmpty;
+
+  globalSave.on.click.add((e) {
+    localList.asList.forEach((m) {
+      globalList.add(m);
+    });
+    localList.clear();
+  });
+
+  globalList.on('add', (m) {
+    addMessageToDOM(globalMessages, m);
+
+    globalClear.disabled = false;
+  });
+
+  globalClear.on.click.add((e) {
+    globalList.clear();
+  });
+
+  globalList.on('clear', () {
+    globalMessages.children.clear();
+    globalClear.disabled = true;
   });
 
   new Timer.repeating(500, (t) {
