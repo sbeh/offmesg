@@ -50,7 +50,6 @@ main() {
   server.addRequestHandler(
       (request) =>
           request.method == 'POST' &&
-          request.headers.contentType.value == 'application/json' &&
           new RegExp('^/?global.dart\$').hasMatch(request.path),
       (request, response) =>
           handleGlobalPost(basePath, request, response));
