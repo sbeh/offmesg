@@ -8,43 +8,58 @@ var basePath;
 handleGlobalPost(String _basePath, HttpRequest request, HttpResponse response) {
   basePath = _basePath;
 
-  var newMessages = new List<int>();
+  var data = new List<int>();
   request.inputStream.onData = () =>
-      newMessages.addAll(request.inputStream.read());
+      // TODO: This may grow to infinity, but I'm pretty sure before something ugly happens.
+      data.addAll(request.inputStream.read());
   request.inputStream.onClosed = () {
-    if(newMessages.length == 0) {
-      print('No messages from client received.');
+    if(data.length == 0) {
+      print('No data from client received.');
       return;
     }
 
     var f = new File('${basePath}global.json');
     f.exists().then((bool found) {
-      if(found) {
-        var s = f.openInputStream();
-        var knownMessages = new List<int>();
-        s.onError = (error) => fail(error, response);
-        s.onData = () =>
-            knownMessages.addAll(s.read());
-        s.onClosed = () {
-          knownMessages = new String.fromCharCodes(knownMessages);
-          knownMessages = parse(knownMessages) as List<String>;
+      if(request.headers.contentType.value == 'application/json') {
+        if(found) {
+          var s = f.openInputStream();
+          var knownMessages = new List<int>();
+          s.onError = (error) => fail(error, response);
+          s.onData = () =>
+              knownMessages.addAll(s.read());
+          s.onClosed = () {
+            knownMessages = new String.fromCharCodes(knownMessages);
+            knownMessages = parse(knownMessages) as List<String>;
 
-          newMessages = new String.fromCharCodes(newMessages);
-          newMessages = parse(newMessages) as List<String>;
-          newMessages.forEach((message) =>
-              print('New message: ${message.
-                replaceAll(new RegExp('\r?\n', multiLine: true),
-                    '\\n')}'));
+            var newMessages = new String.fromCharCodes(data);
+            newMessages = parse(newMessages) as List<String>;
+            newMessages.forEach((message) =>
+                print('New message: ${message.
+                  replaceAll(new RegExp('\r?\n', multiLine: true),
+                      '\\n')}'));
 
-          knownMessages.addAll(newMessages);
+            knownMessages.addAll(newMessages);
 
-          knownMessages = stringify(knownMessages);
-          knownMessages = knownMessages.charCodes;
+            knownMessages = stringify(knownMessages);
+            knownMessages = knownMessages.charCodes;
 
-          save(knownMessages, response);
-        };
-      } else
-        save(newMessages, response);
+            save(knownMessages, response);
+          };
+        } else
+          save(data, response);
+      } else {
+        var command = new String.fromCharCodes(data);
+
+        if(command == 'CLEAR') {
+          if(found)
+            f.delete().then(
+                (e) => success(response),
+                onError: (error) => fail(error, response));
+          else
+            success(response);
+        } else
+          fail('Unknown command: ${command}', response);
+      }
     }, onError: (error) => fail(error, response));
   };
 }

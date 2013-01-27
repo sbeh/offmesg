@@ -58,6 +58,7 @@ void main() {
     globalList.clear();
     ms.forEach((m) => globalList.add(m));
   });
+  globalStorage.get();
 
   globalSave.on.click.add((MouseEvent event) {
     globalStorage.save(localList.asList).then((e) {
@@ -74,8 +75,10 @@ void main() {
     globalClear.disabled = false;
   });
 
-  globalClear.on.click.add((e) {
-    globalList.clear();
+  globalClear.on.click.add((MouseEvent event) {
+    globalStorage.clear().then(
+        (e) => globalList.clear(),
+        onError: (e) => showErrorViaDOM(event.toElement, e.error));
   });
 
   globalList.on('clear', () {
