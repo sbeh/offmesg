@@ -65,7 +65,7 @@ void main() {
         globalList.add(m);
       });
       localList.clear();
-    });
+    }, onError: (e) => showErrorViaDOM(event.toElement, e.error));
   });
 
   globalList.on('add', (m) {
@@ -96,4 +96,31 @@ addMessageToDOM(DivElement container, String message) {
   child.innerHtml = message;
 
   container.children.add(child);
+}
+
+showErrorViaDOM(Element element, error) {
+  print(error);
+
+  var overlay = new DivElement();
+  overlay.style.position = 'absolute';
+  overlay.style.top = '${element.getBoundingClientRect().top}px';
+  overlay.style.left = '${element.getBoundingClientRect().left}px';
+  overlay.style.height = '${element.getBoundingClientRect().height}px';
+  overlay.style.width = '${element.getBoundingClientRect().width}px';
+  overlay.style.backgroundColor = 'rgb(255,0,0)';
+
+  var opacity = .6;
+  overlay.style.opacity = opacity.toString();
+  new Timer.repeating(80, (t) {
+    opacity -= .1;
+
+    if(opacity > 0)
+      overlay.style.opacity = opacity.toString();
+    else {
+      t.cancel();
+      overlay.remove();
+    }
+  });
+
+  document.body.children.add(overlay);
 }
