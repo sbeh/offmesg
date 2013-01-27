@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'dart:async';
 
+import 'lib/global_storage.dart';
 import 'lib/local_storage_list.dart';
 
 void main() {
@@ -53,11 +54,18 @@ void main() {
   globalList.asList.forEach((m) => addMessageToDOM(globalMessages, m));
   globalClear.disabled = globalList.asList.isEmpty;
 
-  globalSave.on.click.add((e) {
-    localList.asList.forEach((m) {
-      globalList.add(m);
+  var globalStorage = new GlobalStorage((ms) {
+    globalList.clear();
+    ms.forEach((m) => globalList.add(m));
+  });
+
+  globalSave.on.click.add((MouseEvent event) {
+    globalStorage.save(localList.asList).then((e) {
+      localList.asList.forEach((m) {
+        globalList.add(m);
+      });
+      localList.clear();
     });
-    localList.clear();
   });
 
   globalList.on('add', (m) {
